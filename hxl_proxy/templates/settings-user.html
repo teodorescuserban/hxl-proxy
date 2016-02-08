@@ -9,12 +9,25 @@
     {% include "includes/navbar.html" %}
     <header>
       <h1>
-        User settings
+        {{ user.name }}
       </h1>
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#overview" data-toggle="tab">
+            Overview
+          </a>
+        </li>
+        <li>
+          <a href="#recipes" data-toggle="tab">
+            Data recipes
+          </a>
+        </li>
+      </ul>
     </header>
-    <main>
+    <main class="tab-content">
 
-      <section id="settings">
+      <section id="overview" class="tab-pane fade in active">
+        <h2>Overview</h2>
         <p class="col-sm-12">
           The HXL Proxy will soon allow you to save data recipes and
           manage private data by logging in via <a
@@ -57,7 +70,7 @@
         </div>
       </section>
 
-      <section id="recipes">
+      <section id="recipes" class="tab-pane fade">
         <h2>Recipes</h2>
         {% for recipe in recipes %}
         <p>
