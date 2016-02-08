@@ -1,6 +1,6 @@
 from hxl_proxy import app
 from flask import g
-import sqlite3
+import sqlite3, json
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -28,31 +28,55 @@ def _executemany(statement, param_list=[]):
     cursor.executemany(statement, param_list)
     return cursor
 
-def get_user(user_id):
-    """Look up a user by id."""
-    return _execute(
-        'select * from Users where user_id=?',
-        (user_id,)
-    ).fetchone()
+class Users:
 
-def add_user(user):
-    """Add a new user."""
-    cursor = get_db().cursor()
-    cursor.execute(
-        'insert into users '
-        '(user_id, email, name, name_given, name_family, last_login) '
-        "values (?, ?, ?, ?, ?, datetime('now'))",
-        (user.get('user_id'), user.get('email'), user.get('name'), user.get('name_given'), user.get('name_family'))
-    )
-    get_db().commit()
+    @staticmethod
+    def create(user):
+        """Add a new user."""
+        cursor = get_db().cursor()
+        cursor.execute(
+            'insert into users '
+            '(user_id, email, name, name_given, name_family, last_login) '
+            "values (?, ?, ?, ?, ?, datetime('now'))",
+            (user.get('user_id'), user.get('email'), user.get('name'), user.get('name_given'), user.get('name_family'))
+        )
+        get_db().commit()
 
-def update_user(user):
-    """Update an existing user."""
-    cursor = get_db().cursor()
-    cursor.execute(
-        'update users '
-        "set email=?, name=?, name_given=?, name_family=?, last_login=datetime('now') "
-        'where user_id=?',
-        (user.get('email'), user.get('name'), user.get('name_given'), user.get('name_family'), user.get('user_id'))
-    )
-    get_db().commit()
+    @staticmethod
+    def read(user_id):
+        """Look up a user by id."""
+        return _execute(
+            'select * from Users where user_id=?',
+            (user_id,)
+        ).fetchone()
+
+    @staticmethod
+    def update(user):
+        """Update an existing user."""
+        cursor = get_db().cursor()
+        cursor.execute(
+            'update users '
+            "set email=?, name=?, name_given=?, name_family=?, last_login=datetime('now') "
+            'where user_id=?',
+            (user.get('email'), user.get('name'), user.get('name_given'), user.get('name_family'), user.get('user_id'))
+        )
+        get_db().commit()
+
+class Recipes:
+
+    @staticmethod
+    def read(recipe_id):
+        recipe = _execute(
+            'select * from Recipes where recipe_id=?',
+            (recipe_id,)
+        ).fetchone()
+        recipe = dict(recipe)
+        recipe['args'] = json.loads(recipe['args'])
+        return recipe
+
+    @staticmethod
+    def list(user_id=None):
+        return _execute(
+            'select * from Recipes where user_id=?',
+            (user_id,)
+        ).fetchall()

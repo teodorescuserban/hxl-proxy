@@ -1,5 +1,6 @@
 pragma foreign_keys='on';
 
+drop table if exists Recipes;
 drop table if exists Users;
 
 create table Users (
@@ -11,3 +12,15 @@ create table Users (
        last_login datetime not null
 );
 
+create table Recipes (
+       recipe_id char(6) primary key,
+       user_id varchar(128) not null,
+       name varchar(128) not null,
+       description text,
+       cloneable boolean default true,
+       stub varchar(64),
+       args text not null,
+       date_created datetime not null,
+       date_modified datetime not null,
+       foreign key(user_id) references Users(user_id)
+);

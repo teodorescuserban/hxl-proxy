@@ -60,7 +60,7 @@ def before_request():
     request.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
     g.profiles = ProfileManager(app.config['PROFILE_FILE'])
     if (session.get('user_id')):
-        g.user = dao.get_user(session.get('user_id'))
+        g.user = dao.Users.read(session.get('user_id'))
     else:
         g.user = None
 
@@ -109,13 +109,13 @@ def show_data_tag(key=None):
     if header_row:
         header_row = int(header_row)
 
-    if not profile.args.get('url'):
+    if not profile['args'].get('url'):
         flash('Please choose a data source first.')
         return redirect(make_data_url(profile, key, 'source'), 303)
 
     preview = []
     i = 0
-    for row in hxl.io.make_input(profile.args.get('url')):
+    for row in hxl.io.make_input(profile['args'].get('url')):
         if i >= 25:
             break
         else:
@@ -137,7 +137,7 @@ def show_data_edit(key=None):
         return redirect(make_data_url(None, key=key, facet='login'), 303)
 
 
-    if profile.args.get('url'):
+    if profile['args'].get('url'):
         # show only a short preview
         try:
             source = PreviewFilter(setup_filters(profile), max_rows=5)
@@ -152,12 +152,12 @@ def show_data_edit(key=None):
     # Figure out how many filter forms to show
     filter_count = 0
     for n in range(1, MAX_FILTER_COUNT):
-        if profile.args.get('filter%02d' % n):
+        if profile['args'].get('filter%02d' % n):
             filter_count = n
     if filter_count < MAX_FILTER_COUNT:
         filter_count += 1
 
-    show_headers = (profile.args.get('strip-headers') != 'on')
+    show_headers = (profile['args'].get('strip-headers') != 'on')
 
     return render_template('data-recipe.html', key=key, profile=profile, source=source, show_headers=show_headers, filter_count=filter_count)
 
@@ -171,7 +171,7 @@ def show_data_profile(key=None):
     except Forbidden as e:
         return redirect(make_data_url(None, key=key, facet='login'), 303)
 
-    if not profile or not profile.args.get('url'):
+    if not profile or not profile['args'].get('url'):
         return redirect('/data/source', 303)
 
     return render_template('data-about.html', key=key, profile=profile)
@@ -181,7 +181,7 @@ def show_data_profile(key=None):
 def show_data_chart(key=None):
     """Show a chart visualisation for the data."""
     profile = get_profile(key)
-    if not profile or not profile.args.get('url'):
+    if not profile or not profile['args'].get('url'):
         return redirect('/data/source', 303)
 
     source = setup_filters(profile)
@@ -199,7 +199,7 @@ def show_data_chart(key=None):
 def show_data_map(key=None):
     """Show a map visualisation for the data."""
     profile = get_profile(key)
-    if not profile or not profile.args.get('url'):
+    if not profile or not profile['args'].get('url'):
         return redirect('/data/source', 303)
     layer_tag = hxl.TagPattern.parse(request.args.get('layer', 'adm1'))
     return render_template('visualise-map.html', key=key, profile=profile, layer_tag=layer_tag)
@@ -211,15 +211,15 @@ def show_validate(key=None):
 
     # Get the profile
     profile = get_profile(key)
-    if not profile or not profile.args.get('url'):
+    if not profile or not profile['args'].get('url'):
         return redirect('/data/source', 303)
 
     # Get the parameters
-    url = profile.args.get('url')
+    url = profile['args'].get('url')
     if request.args.get('schema_url'):
         schema_url = request.args.get('schema_url', None)
     else:
-        schema_url = profile.args.get('schema_url', None)
+        schema_url = profile['args'].get('schema_url', None)
 
     severity_level = request.args.get('severity', 'info')
 
@@ -241,11 +241,11 @@ def show_data(key=None, format="html", stub=None):
 
     def get_result (key, format):
         profile = get_profile(key, auth=False)
-        if not profile or not profile.args.get('url'):
+        if not profile or not profile['args'].get('url'):
             return redirect('/data/source', 303)
 
         source = setup_filters(profile)
-        show_headers = (profile.args.get('strip-headers') != 'on')
+        show_headers = (profile['args'].get('strip-headers') != 'on')
 
         if format == 'html':
             return render_template('data-view.html', source=source, profile=profile, key=key, show_headers=show_headers)
@@ -297,10 +297,10 @@ def do_data_save():
         profile.stub = request.form['stub']
 
     # merge args
-    profile.args = {}
+    profile['args'] = {}
     for name in request.form:
         if request.form.get(name) and name not in BLACKLIST:
-            profile.args[name] = request.form.get(name)
+            profile['args'][name] = request.form.get(name)
 
     # check for a password change
     password = request.form.get('password')
@@ -332,7 +332,7 @@ def do_data_save():
 @app.route('/settings/user')
 def do_user_settings():
     if g.user:
-        return render_template('settings-user.html', user=g.user)
+        return render_template('settings-user.html', user=g.user, recipes=dao.Recipes.list(g.user['user_id']))
     else:
         return redirect('/login', 303)
 
@@ -363,11 +363,11 @@ def do_hid_authorisation():
 
     user_id = user_info['user_id']
     session['user_id'] = user_id
-    user = dao.get_user(user_id)
+    user = dao.Users.read(user_id)
     if user:
-        dao.update_user(user_info)
+        dao.Users.update(user_info)
     else:
-        dao.add_user(user_info)
+        dao.Users.create(user_info)
     flash("Connected to your Humanitarian.ID account as {}".format(user_info.get('name')))
     return redirect(redirect_path, 303)
 

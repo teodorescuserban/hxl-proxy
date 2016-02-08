@@ -17,7 +17,7 @@ from flask import url_for, request, flash, session, g
 
 import hxl
 
-from hxl_proxy import app
+from hxl_proxy import app, dao
 from hxl_proxy.profiles import Profile
 
 CACHE_KEY_EXCLUDES = ['force']
@@ -61,7 +61,7 @@ def urlencode_utf8(params):
     )
 
 def using_tagger_p(profile):
-    for name in profile.args:
+    for name in profile['args']:
         if re.match(r'^tagger-', name):
             return True
     return False
@@ -84,7 +84,7 @@ def get_profile(key=None, auth=False, args=None):
         args = request.args
 
     if key:
-        profile = g.profiles.get_profile(str(key))
+        profile = dao.Recipes.read(str(key))
         if not profile:
             raise NotFound("No saved profile for " + key)
         if auth and not check_auth(profile):
@@ -96,7 +96,7 @@ def get_profile(key=None, auth=False, args=None):
     for key in PROFILE_OVERRIDES:
         if args.get(key):
             profile.overridden = True
-            profile.args[key] = args.get(key)
+            profile['args'][key] = args.get(key)
 
     return profile
 
@@ -148,7 +148,7 @@ def make_data_url(profile, key=None, facet=None, format=None):
             url += '.' + urlquote(format)
         elif facet:
             url += '/' + urlquote(facet)
-        url += '?' + urlencode_utf8(profile.args)
+        url += '?' + urlencode_utf8(profile['args'])
 
     return url
 
