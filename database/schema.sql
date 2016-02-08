@@ -16,6 +16,8 @@ create table Recipes (
        recipe_id char(6) primary key,
        user_id varchar(128) not null,
        name varchar(128) not null,
+       url text not null,
+       schema_url text,
        description text,
        cloneable boolean default true,
        stub varchar(64),

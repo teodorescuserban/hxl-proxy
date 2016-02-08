@@ -46,17 +46,21 @@ for key in shelf:
     name = shelf[key].name or "Anonymous recipe"
     description = shelf[key].description
     cloneable = shelf[key].cloneable
+    url = shelf[key].args.get('url')
+    schema_url = shelf[key].args.get('schema_url')
     if hasattr(shelf[key], 'stub'):
         stub = shelf[key].stub
     else:
         stub = None
     args = shelf[key].args
-    cursor.execute(
-        "insert into Recipes "
-        "(recipe_id, user_id, name, description, cloneable, stub, args, date_created, date_modified) "
-        "values (?, ?, ?, ?, ?, ?, ?, date('now'), date('now'))",
-        (key, user_id, name, description, cloneable, stub, json.dumps(clean_args(args)),)
-    )
+
+    if url:
+        cursor.execute(
+            "insert into Recipes "
+            "(recipe_id, user_id, name, description, url, schema_url, cloneable, stub, args, date_created, date_modified) "
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'), date('now'))",
+            (key, user_id, name, description, url, schema_url, cloneable, stub, json.dumps(clean_args(args)),)
+        )
     
 connection.commit()
 connection.close()
