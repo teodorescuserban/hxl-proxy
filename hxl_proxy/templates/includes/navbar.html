@@ -49,11 +49,11 @@
         {% endif %}
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        {% if g.member %}
+        {% if g.user %}
         <li class="{% if facet=='settings' %}active{% endif %}">
           <a href="/settings/user">
             <span class="glyphicon glyphicon-user"></span>
-            {{ g.member.name_given }}
+            {{ g.user.name_given }}
           </a>
         </li>
         <li>

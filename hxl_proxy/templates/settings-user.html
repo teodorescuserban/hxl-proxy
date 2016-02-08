@@ -21,29 +21,29 @@
         H.ID:
       </p>
       <div class="col-sm-3">
-        <img class="img-responsive" src="{{ get_gravatar(member.email, size=800) }}" alt="User gravatar" />
+        <img class="img-responsive" src="{{ get_gravatar(user.email, size=800) }}" alt="User gravatar" />
       </div>
 
       <div class="col-sm-9">
         <dl class="dl-horizontal">
 
           <dt>Full name</dt>
-          <dd>{{ member.name }}</dd>
+          <dd>{{ user.name }}</dd>
 
           <dt>Family name</dt>
-          <dd>{{ member.name_family }}</dd>
+          <dd>{{ user.name_family }}</dd>
 
           <dt>Given name</dt>
-          <dd>{{ member.name_given }}</dd>
+          <dd>{{ user.name_given }}</dd>
 
           <dt>Email (not public)</dt>
-          <dd>{{ member.email }}</dd>
+          <dd>{{ user.email }}</dd>
 
           <dt>H.ID user id (not public)</dt>
-          <dd>{{ member.id }}</dd>
+          <dd>{{ user.user_id }}</dd>
 
-          <dt>Active H.ID user?</dt>
-          <dd>{% if member.active %}yes{% else %}no{% endif %}</dd>
+          <dt>Last login</dt>
+          <dd>{{ user.last_login }} UTC</dd>
 
         </dl>
 

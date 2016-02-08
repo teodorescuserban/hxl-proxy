@@ -22,7 +22,7 @@ from flask import Response, flash, request, render_template, redirect, make_resp
 
 import hxl
 
-from hxl_proxy import app, cache
+from hxl_proxy import app, cache, dao
 from hxl_proxy.util import get_profile, check_auth, make_data_url, make_cache_key, skip_cache_p, urlencode_utf8
 from hxl_proxy.filters import setup_filters, MAX_FILTER_COUNT
 from hxl_proxy.validate import do_validate
@@ -59,7 +59,10 @@ def before_request():
     app.secret_key = app.config['SECRET_KEY']
     request.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
     g.profiles = ProfileManager(app.config['PROFILE_FILE'])
-    g.member = session.get('member_info')
+    if (session.get('user_id')):
+        g.user = dao.get_user(session.get('user_id'))
+    else:
+        g.user = None
 
 #
 # Redirects for deprecated URL patterns
@@ -328,8 +331,8 @@ def do_data_save():
 
 @app.route('/settings/user')
 def do_user_settings():
-    if g.member:
-        return render_template('settings-user.html', member=g.member)
+    if g.user:
+        return render_template('settings-user.html', user=g.user)
     else:
         return redirect('/login', 303)
 
@@ -357,7 +360,14 @@ def do_hid_authorisation():
     user_info = get_hid_user(code)
     redirect_path = session.get('login_redirect', '/')
     del session['login_redirect']
-    session['member_info'] = user_info
+
+    user_id = user_info['user_id']
+    session['user_id'] = user_id
+    user = dao.get_user(user_id)
+    if user:
+        dao.update_user(user_info)
+    else:
+        dao.add_user(user_info)
     flash("Connected to your Humanitarian.ID account as {}".format(user_info.get('name')))
     return redirect(redirect_path, 303)
 
