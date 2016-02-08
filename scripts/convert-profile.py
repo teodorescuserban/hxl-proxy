@@ -19,7 +19,7 @@ sqlite3_file = sys.argv[2]
 #
 # Leave out old, leaky args, and any empty values
 #
-IGNORE_ARGS = ['key', 'cloneable', 'format', 'filter_count', 'password', 'password-repeat', 'name', 'description', 'schema_url']
+IGNORE_ARGS = ['key', 'cloneable', 'format', 'filter_count', 'password', 'password-repeat', 'name', 'description']
 
 def clean_args(args_in):
     """Clean the args"""
