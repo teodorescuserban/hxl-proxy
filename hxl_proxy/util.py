@@ -13,7 +13,7 @@ import re
 
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden, NotFound
 
-from flask import url_for, request, flash, session, g
+from flask import url_for, request, flash, session, g, get_flashed_messages
 
 import hxl
 
@@ -36,8 +36,8 @@ def make_cache_key (path = None, args_in=None):
 
 def skip_cache_p ():
     """Test if we should skip the cache."""
-    return True if request.args.get('force') or g.user else False
-    
+    return True if (request.args.get('force') or g.user or get_flashed_messages()) else False
+
 def strnorm (s):
     """Normalise a string"""
     return hxl.common.normalise_string(s)

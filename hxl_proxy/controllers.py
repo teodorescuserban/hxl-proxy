@@ -252,10 +252,6 @@ def show_data(key=None, format="html", stub=None):
             return response
 
     result = get_result(key, format)
-    if skip_cache_p() and not g.user:
-        # Want to store the new value, but can't get the key to work
-        # Clearing the whole cache for now (heavy-handed)
-        cache.set(show_data.make_cache_key(), result)
     return result
 
 @app.route("/actions/save-profile", methods=['POST'])
