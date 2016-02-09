@@ -57,14 +57,19 @@
           </a>
         </li>
         <li>
-          <a href="/logout?from={{ request.full_path }}">
+          {% if profile and key %}
+          {% set from=data_url(profile, key) %}
+          {% else %}
+          {% set from=request.full_path %}
+          {% endif %}
+          <a href="/logout{% if not profile or not profile.key %}?from={{ from|urlquote }}{% endif %}">
             <span class="glyphicon glyphicon-log-out"></span>
             Logout
           </a>
         </li>
         {% else %}
         <li>
-          <a href="/login?from={{ request.full_path }}">
+          <a href="/login?from={{ request.full_path|urlquote }}">
             <span class="glyphicon glyphicon-log-in"></span>
             Login
           </a>

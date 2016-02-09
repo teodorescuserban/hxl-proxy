@@ -90,12 +90,12 @@ def get_profile(key=None, auth=False, args=None):
         if auth and not check_auth(profile):
             raise Forbidden("Not authorised")
     else:
-        profile = Profile(args)
+        profile = { 'args': {} }
 
     # Allow some values to be overridden from request parameters
     for key in PROFILE_OVERRIDES:
         if args.get(key):
-            profile.overridden = True
+            profile['overridden'] = True
             profile['args'][key] = args.get(key)
 
     return profile

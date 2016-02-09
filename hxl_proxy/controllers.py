@@ -37,11 +37,12 @@ from hxl_proxy.profiles import ProfileManager, BLACKLIST
 
 @app.errorhandler(403)
 def handle_forbidden(error):
-    flash(str(error))
     if g.user:
+        flash("Not allowed to access {}".format(request.full_path))
         return redirect('/settings/user', 303)
     else:
-        return redirect('/login?from={}'.format(request.full_path, 303))
+        flash("Must be logged in to access {}".format(request.full_path))
+        return redirect('/login?from={}'.format(urlquote(request.full_path), 303))
 
 def error(e):
     """Default error page."""
