@@ -36,7 +36,7 @@ def make_cache_key (path = None, args_in=None):
 
 def skip_cache_p ():
     """Test if we should skip the cache."""
-    return True if request.args.get('force') else False
+    return True if request.args.get('force') or g.user else False
     
 def strnorm (s):
     """Normalise a string"""
@@ -88,7 +88,7 @@ def get_profile(key=None, auth=False, args=None):
         if not profile:
             raise NotFound("No saved profile for " + key)
         if auth and not check_auth(profile):
-            raise Forbidden("Wrong or missing password.")
+            raise Forbidden("Not authorised")
     else:
         profile = Profile(args)
 
@@ -103,18 +103,10 @@ def get_profile(key=None, auth=False, args=None):
 
 def check_auth(profile):
     """Check authorisation."""
-    passhash = session.get('passhash')
-    if passhash and profile.passhash == passhash:
+    if g.user and (g.user['user_id'] == profile['user_id']):
         return True
-    password = request.form.get('password')
-    if password:
-        if profile.check_password(password):
-            session['passhash'] = profile.passhash
-            return True
-        else:
-            session['passhash'] = None
-            flash("Wrong password")
-    return False
+    else:
+        return False
 
 def add_args(extra_args):
     """Add GET parameters."""
@@ -130,7 +122,7 @@ def add_args(extra_args):
             del args[key]
     return '?' + urlencode_utf8(args)
 
-def make_data_url(profile, key=None, facet=None, format=None):
+def make_data_url(profile=None, key=None, facet=None, format=None):
     """Construct a data URL for a profile."""
     url = None
     if key:

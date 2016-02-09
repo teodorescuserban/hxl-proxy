@@ -1,4 +1,5 @@
-<ul class="nav nav-tabs"> 
+{% if not profile.user_id or (g.user and g.user.user_id==profile.user_id) %}
+<ul class="nav nav-tabs">
   <li class="{% if facet=='source' %}active{% endif %}">
     <a href="{{ data_url(profile, key, 'source') }}">
       Source
@@ -33,3 +34,4 @@
     </a>
   </li>
 </ul>
+{% endif %}

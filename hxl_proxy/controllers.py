@@ -35,6 +35,14 @@ from hxl_proxy.profiles import ProfileManager, BLACKLIST
 # Error handling
 #
 
+@app.errorhandler(403)
+def handle_forbidden(error):
+    flash(str(error))
+    if g.user:
+        return redirect('/settings/user', 303)
+    else:
+        return redirect('/login?from={}'.format(request.full_path, 303))
+
 def error(e):
     """Default error page."""
     if isinstance(e, IOError):
@@ -58,7 +66,6 @@ def before_request():
     """Code to run immediately before the request"""
     app.secret_key = app.config['SECRET_KEY']
     request.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
-    g.profiles = ProfileManager(app.config['PROFILE_FILE'])
     if (session.get('user_id')):
         g.user = dao.Users.read(session.get('user_id'))
     else:
@@ -86,12 +93,7 @@ def show_data_login(key):
 @app.route("/data/<key>/source")
 def show_data_source(key=None):
     """Choose a new data source."""
-
-    try:
-        profile = get_profile(key, auth=True)
-    except Forbidden as e:
-        return redirect(make_data_url(None, key=key, facet='login'), 303)
-
+    profile = get_profile(key, auth=True)
     return render_template('data-source.html', key=key, profile=profile)
 
 
@@ -99,11 +101,7 @@ def show_data_source(key=None):
 @app.route("/data/<key>/tagger")
 def show_data_tag(key=None):
     """Add HXL tags to an untagged dataset."""
-
-    try:
-        profile = get_profile(key, auth=True)
-    except Forbidden as e:
-        return redirect(make_data_url(None, key=key, facet='login'), 303)
+    profile = get_profile(key, auth=True)
 
     header_row = request.args.get('header-row')
     if header_row:
@@ -130,12 +128,7 @@ def show_data_tag(key=None):
 @app.route("/data/<key>/edit", methods=['GET', 'POST'])
 def show_data_edit(key=None):
     """Create or edit a filter pipeline."""
-
-    try:
-        profile = get_profile(key, auth=True)
-    except Forbidden as e:
-        return redirect(make_data_url(None, key=key, facet='login'), 303)
-
+    profile = get_profile(key, auth=True)
 
     if profile['args'].get('url'):
         # show only a short preview
@@ -165,11 +158,7 @@ def show_data_edit(key=None):
 @app.route("/data/<key>/profile")
 def show_data_profile(key=None):
     """Show form to save a profile."""
-
-    try:
-        profile = get_profile(key, auth=True)
-    except Forbidden as e:
-        return redirect(make_data_url(None, key=key, facet='login'), 303)
+    profile = get_profile(key, auth=True)
 
     if not profile or not profile['args'].get('url'):
         return redirect('/data/source', 303)
@@ -263,7 +252,7 @@ def show_data(key=None, format="html", stub=None):
             return response
 
     result = get_result(key, format)
-    if skip_cache_p():
+    if skip_cache_p() and not g.user:
         # Want to store the new value, but can't get the key to work
         # Clearing the whole cache for now (heavy-handed)
         cache.set(show_data.make_cache_key(), result)
@@ -281,10 +270,7 @@ def do_data_save():
 
     # We will have a key if we're updating an existing pipeline
     key = request.form.get('key')
-    try:
-        profile = get_profile(key, auth=True, args=request.form)
-    except Forbidden as e:
-        return redirect(make_data_url(None, key=key, facet='login'), 303)
+    profile = get_profile(key, auth=True, args=request.form)
 
     # Update profile metadata
     if 'name' in request.form:
