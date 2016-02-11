@@ -152,7 +152,7 @@ class TestEditPage(BaseControllerTest):
         self.assertBasicDataset(response)
 
     def test_need_login(self):
-        response = self.get('/data/{}/edit'.format(self.key), status=303)
+        response = self.get('/data/{}/edit'.format('AAAAA'), status=303)
         assert '/login'.format(self.key) in response.headers['Location']
 
     # TODO test logging in (good and bad passwords)
@@ -181,7 +181,6 @@ class TestDataPage(BaseControllerTest):
     @patch(URL_MOCK_TARGET, new=URL_MOCK_OBJECT)
     def test_key(self):
         response = self.get('/data/{}'.format('AAAAA'))
-        print(response.data)
         assert b'Recipe #1' in response.data
         self.assertBasicDataset(response)
 

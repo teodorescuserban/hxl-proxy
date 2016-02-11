@@ -22,11 +22,11 @@ def setup_filters(profile):
     """
 
     # null profile or url means null source
-    if not profile or not profile['args'].get('url'):
+    if not profile or not profile.get('url'):
         return None
 
     # Basic input source
-    source = hxl.data(make_tagged_input(profile['args']))
+    source = hxl.data(make_tagged_input(profile))
 
     # Create the filter pipeline from the source
     for index in range(1, MAX_FILTER_COUNT):
@@ -60,9 +60,10 @@ def setup_filters(profile):
 
     return source
 
-def make_tagged_input(args):
+def make_tagged_input(profile):
     """Create the raw input, optionally using the Tagger filter."""
-    url = args.get('url')
+    url = profile.get('url')
+    args = profile['args']
     input = hxl.make_input(url)
 
     # Intercept tagging as a special data input

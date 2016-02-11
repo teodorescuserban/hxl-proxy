@@ -9,7 +9,7 @@
     {% include "includes/navbar.html" %}
     {% endwith %}
     <header class="col-sm-12">
-      {% if profile.args.url %}
+      {% if profile.url %}
       {% with facet='source' %}
       {% include "includes/data-tabs.html" %}
       {% endwith %}
@@ -41,7 +41,7 @@
                      name="url"
                      type="url"
                      required="required"
-                     value="{{ profile.args.url }}"
+                     value="{{ profile.url }}"
                      placeholder="http://example.org/dataset.csv" />
               <div class="input-group-btn">
                 <button class="btn btn-success"

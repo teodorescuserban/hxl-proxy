@@ -76,6 +76,7 @@ def get_gravatar(email, size=40):
     return url
 
 PROFILE_OVERRIDES = ['url', 'schema_url']
+PROFILE_ARGS_EXCLUDE = ['url', 'schema_url', 'stub', 'key', 'cloneable', 'format', 'filter_count', 'password', 'password-repeat', 'name', 'description']
 
 def get_profile(key=None, auth=False, args=None):
     """Load a profile or create from args."""
@@ -96,9 +97,16 @@ def get_profile(key=None, auth=False, args=None):
                 profile['args'][name] = args.get(name)
     else:
         profile = { 'args': {} }
+
+        # Copy args
         for name in args:
             profile['args'][name] = args[name]
-        profile['url'] = profile['args'].get('url')
+
+        # Move up top-level properties
+        for name in PROFILE_ARGS_EXCLUDE:
+            if profile['args'].get(name):
+                profile[name] = profile['args'][name]
+                del profile['args'][name]
 
     return profile
 

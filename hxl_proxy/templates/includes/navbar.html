@@ -13,13 +13,13 @@
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="{% if facet=='source' and not profile.args.url %}active{% endif %}">
+        <li class="{% if facet=='source' and not profile.url %}active{% endif %}">
           <a href="/data/source">
             <span class="glyphicon glyphicon-plus"></span>
             New
           </a>
         </li>
-        {% if profile and profile.args.url %}
+        {% if profile and profile.url %}
         <li class="{% if facet in ['source', 'tagger', 'edit', 'view'] %}active{% endif %}">
           <a href="{{ data_url(profile, key) }}">
             <span class="glyphicon glyphicon-th-list"></span>
