@@ -12,6 +12,7 @@ import operator
 
 from hxl.model import TagPattern
 from hxl.io import ArrayInput, HXLReader
+import hxl_proxy
 from hxl_proxy.filters import *
 from hxl_proxy.profiles import Profile
 
@@ -43,7 +44,7 @@ class TestSetupFilters(unittest.TestCase):
             'filter03': 'sort',
             'sort-tags02': 'adm1,adm2'
         }
-        profile = Profile(args)
+        profile = hxl_proxy.util.get_profile(args=args)
         source = setup_filters(profile)
 
         # check the whole pipeline
@@ -56,7 +57,7 @@ class TestSetupFilters(unittest.TestCase):
         self.assertIsNone(setup_filters(None), "ok to pass None to setup_filters")
 
     def test_null_url(self):
-        profile = Profile({})
+        profile = hxl_proxy.util.get_profile(args={})
         self.assertIsNone(setup_filters(profile), "ok to pass null URL to setup_filters")
 
 
