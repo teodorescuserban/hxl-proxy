@@ -36,7 +36,7 @@ def make_cache_key (path = None, args_in=None):
 
 def skip_cache_p ():
     """Test if we should skip the cache."""
-    return True if (request.args.get('force') or g.user or get_flashed_messages()) else False
+    return True if (request.args.get('force') or (hasattr(g, 'user') and g.user) or get_flashed_messages()) else False
 
 def strnorm (s):
     """Normalise a string"""
@@ -89,14 +89,16 @@ def get_profile(key=None, auth=False, args=None):
             raise NotFound("No saved profile for " + key)
         if auth and not check_auth(profile):
             raise Forbidden("Not authorised")
+        # Allow some values to be overridden from request parameters
+        for name in PROFILE_OVERRIDES:
+            if args.get(name):
+                profile['overridden'] = True
+                profile['args'][name] = args.get(name)
     else:
         profile = { 'args': {} }
-
-    # Allow some values to be overridden from request parameters
-    for key in PROFILE_OVERRIDES:
-        if args.get(key):
-            profile['overridden'] = True
-            profile['args'][key] = args.get(key)
+        for name in args:
+            profile['args'][name] = args[name]
+        profile['url'] = profile['args'].get('url')
 
     return profile
 

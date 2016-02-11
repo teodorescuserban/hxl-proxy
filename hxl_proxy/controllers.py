@@ -85,11 +85,6 @@ def redirect_home():
 # Primary controllers
 #
 
-@app.route("/data/<key>/login")
-def show_data_login(key):
-    profile = get_profile(key)
-    return render_template('data-login.html', key=key, profile=profile)
-
 @app.route("/data/source")
 @app.route("/data/<key>/source")
 def show_data_source(key=None):
@@ -231,7 +226,7 @@ def show_data(key=None, format="html", stub=None):
 
     def get_result (key, format):
         profile = get_profile(key, auth=False)
-        if not profile or not profile['args'].get('url'):
+        if not profile or not profile.get('url'):
             return redirect('/data/source', 303)
 
         source = setup_filters(profile)

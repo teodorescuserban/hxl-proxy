@@ -1,12 +1,14 @@
 from hxl_proxy import app
 from flask import g
-import sqlite3, json
+import sqlite3, json, os
+
+SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'schema.sql')
+DB_FILE = app.config.get('DB_FILE', '/tmp/hxl-proxy.db')
 
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db_file = app.config.get('DB_FILE', '/tmp/hxl-proxy.db')
-        db = g._database = sqlite3.connect(db_file)
+        db = g._database = sqlite3.connect(DB_FILE)
         db.row_factory = sqlite3.Row
     return db
 
@@ -27,6 +29,23 @@ def _executemany(statement, param_list=[]):
     cursor = get_db().cursor()
     cursor.executemany(statement, param_list)
     return cursor
+
+def _executescript(sql_statements, commit=True):
+    """Execute a script of statements, and commit if requested."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.executescript(sql_statements)
+    if commit:
+        db.commit()
+
+def _executefile(filename, commit=True):
+    """Open a SQL file and execute it as a script."""
+    with open(filename, 'r') as input:
+        _executescript(input.read(), commit)
+
+def create_db():
+    """Create a new database, erasing the current one."""
+    _executefile(SCHEMA_FILE)
 
 class Users:
 

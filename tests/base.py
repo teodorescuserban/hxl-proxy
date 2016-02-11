@@ -17,24 +17,30 @@ from hxl_proxy.profiles import ProfileManager, Profile
 class BaseControllerTest(unittest.TestCase):
     """Base class for controller tests."""
     
+    DB_SCRIPT = os.path.join(os.path.dirname(__file__), 'test-data.sql')
+
     def setUp(self):
-        """Set up a test object with a temporary profile database"""
-        with tempfile.NamedTemporaryFile(delete=True) as file:
-            self.filename = file.name
         hxl_proxy.app.config['DEBUG'] = False
-        hxl_proxy.app.config['PROFILE_FILE'] = self.filename
+        hxl_proxy.app.config['DB_FILE'] = ':memory:'
         hxl_proxy.app.config['SECRET_KEY'] = 'abcde'
         hxl_proxy.app.config['HID_BASE_URL'] = 'https://hid.example.org'
         hxl_proxy.app.config['HID_CLIENT_ID'] = '12345'
         hxl_proxy.app.config['HID_REDIRECT_URI'] = 'https://proxy.example.org'
-        
-        self.key = ProfileManager(self.filename).add_profile(self.make_profile())
+
+        # create an empty database
+        with hxl_proxy.app.test_request_context('/'):
+            hxl_proxy.dao.create_db()
+            hxl_proxy.dao._executefile(self.DB_SCRIPT)
+
+        #self.key = ProfileManager(self.filename).add_profile(self.make_profile())
+        self.key = 'AAAAA'
         self.client = hxl_proxy.app.test_client()
 
+        
     def tearDown(self):
         """Remove the temporary profile database"""
-        os.remove(self.filename)
-
+        pass
+    
     def get(self, path, params=None, status=200):
         """
         Send a request to the test client and hang onto the result.
