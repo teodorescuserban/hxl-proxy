@@ -33,6 +33,6 @@ class TestRecipe(unittest.TestCase):
     def test_query_string(self):
         recipe = Recipe(self.ARGS_IN)
         arg_list = []
-        for name, value in self.ARGS_IN.items():
+        for name, value in sorted(self.ARGS_IN.items()):
             arg_list.append("{}={}".format(urlquote(name), urlquote(value)))
         self.assertEqual("&".join(arg_list), recipe.to_query_string())

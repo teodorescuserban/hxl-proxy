@@ -55,19 +55,19 @@ class TestUtil(unittest.TestCase):
     def test_using_tagger_p(self):
         """Test that we can detect use of tagger"""
         with hxl_proxy.app.test_request_context('/data?url=http://example.org&tagger-01-header=country+code&tagger-01-tag=country%2Bcode'):
-            profile = hxl_proxy.util.get_profile()
+            profile = hxl_proxy.dao.get_recipe()
             print(profile)
             self.assertTrue(hxl_proxy.util.using_tagger_p(profile))
         with hxl_proxy.app.test_request_context('/data?url=http://example.org'):
-            profile = hxl_proxy.util.get_profile()
+            profile = hxl_proxy.dao.get_recipe()
             self.assertFalse(hxl_proxy.util.using_tagger_p(profile))
 
     def test_get_profile(self):
         # TODO test with key access
         with hxl_proxy.app.test_request_context('/data?url=http://example.org&filter01=count&count-spec01=country'):
-            profile = hxl_proxy.util.get_profile()
+            profile = hxl_proxy.dao.get_recipe()
             self.assertTrue(profile)
-            self.assertEqual('count', profile['args'].get('filter01'))
+            self.assertEqual('count', profile.args.get('filter01'))
 
     # skip check_auth
 

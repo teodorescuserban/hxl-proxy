@@ -73,5 +73,5 @@ class Recipe(object):
             else:
                 del filtered_args[name]
 
-        return "&".join("{}={}".format(urlquote(name), urlquote(value)) for name, value in filtered_args.items())
+        return "&".join("{}={}".format(urlquote(name), urlquote(value)) for name, value in sorted(filtered_args.items()))
         

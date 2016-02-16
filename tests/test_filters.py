@@ -43,7 +43,7 @@ class TestSetupFilters(unittest.TestCase):
             'filter03': 'sort',
             'sort-tags02': 'adm1,adm2'
         }
-        profile = hxl_proxy.util.get_profile(args=args)
+        profile = hxl_proxy.dao.get_recipe(args=args)
         source = setup_filters(profile)
 
         # check the whole pipeline
@@ -56,7 +56,7 @@ class TestSetupFilters(unittest.TestCase):
         self.assertIsNone(setup_filters(None), "ok to pass None to setup_filters")
 
     def test_null_url(self):
-        profile = hxl_proxy.util.get_profile(args={})
+        profile = hxl_proxy.dao.get_recipe(args={})
         self.assertIsNone(setup_filters(profile), "ok to pass null URL to setup_filters")
 
 

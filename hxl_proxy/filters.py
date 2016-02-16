@@ -17,12 +17,12 @@ MAX_FILTER_COUNT = 99
 def setup_filters(profile):
     """
     Open a stream to a data source URL, and create a filter pipeline based on the arguments.
-    @param profile the GET-request profile (uses only profile['args']).
+    @param profile the GET-request profile (uses only profile.args).
     @return a HXL DataSource representing the full pipeline.
     """
 
     # null profile or url means null source
-    if not profile or not profile.get('url'):
+    if not profile or not profile.url:
         return None
 
     # Basic input source
@@ -30,31 +30,31 @@ def setup_filters(profile):
 
     # Create the filter pipeline from the source
     for index in range(1, MAX_FILTER_COUNT):
-        filter = profile['args'].get('filter%02d' % index)
+        filter = profile.args.get('filter%02d' % index)
         if filter == 'add':
-            source = add_add_filter(source, profile['args'], index)
+            source = add_add_filter(source, profile.args, index)
         elif filter == 'clean':
-            source = add_clean_filter(source, profile['args'], index)
+            source = add_clean_filter(source, profile.args, index)
         elif filter == 'count':
-            source = add_count_filter(source, profile['args'], index)
+            source = add_count_filter(source, profile.args, index)
         elif filter == 'column' or filter == 'cut':
-            source = add_column_filter(source, profile['args'], index)
+            source = add_column_filter(source, profile.args, index)
         elif filter == 'dedup':
-            source = add_dedup_filter(source, profile['args'], index)
+            source = add_dedup_filter(source, profile.args, index)
         elif filter == 'merge':
-            source = add_merge_filter(source, profile['args'], index)
+            source = add_merge_filter(source, profile.args, index)
         elif filter == 'rename':
-            source = add_rename_filter(source, profile['args'], index)
+            source = add_rename_filter(source, profile.args, index)
         elif filter == 'rows' or filter == 'select':
-            source = add_row_filter(source, profile['args'], index)
+            source = add_row_filter(source, profile.args, index)
         elif filter == 'sort':
-            source = add_sort_filter(source, profile['args'], index)
+            source = add_sort_filter(source, profile.args, index)
         elif filter == 'append':
-            source = add_append_filter(source, profile['args'], index)
+            source = add_append_filter(source, profile.args, index)
         elif filter == 'replace':
-            source = add_replace_filter(source, profile['args'], index)
+            source = add_replace_filter(source, profile.args, index)
         elif filter == 'replace-map':
-            source = add_replace_map_filter(source, profile['args'], index)
+            source = add_replace_map_filter(source, profile.args, index)
         elif filter:
             raise Exception("Unknown filter type '{}'".format(filter))
 
@@ -62,8 +62,8 @@ def setup_filters(profile):
 
 def make_tagged_input(profile):
     """Create the raw input, optionally using the Tagger filter."""
-    url = profile.get('url')
-    args = profile['args']
+    url = profile.url
+    args = profile.args
     input = hxl.make_input(url)
 
     # Intercept tagging as a special data input

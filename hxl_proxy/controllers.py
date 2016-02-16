@@ -23,7 +23,7 @@ from flask import Response, flash, request, render_template, redirect, make_resp
 import hxl
 
 from hxl_proxy import app, cache, dao
-from hxl_proxy.util import get_profile, check_auth, make_data_url, make_cache_key, skip_cache_p, urlencode_utf8
+from hxl_proxy.util import check_auth, make_data_url, make_cache_key, skip_cache_p, urlencode_utf8
 from hxl_proxy.filters import setup_filters, MAX_FILTER_COUNT
 from hxl_proxy.validate import do_validate
 from hxl_proxy.hdx import get_hdx_datasets
@@ -88,7 +88,7 @@ def redirect_home():
 @app.route("/data/<key>/source")
 def show_data_source(key=None):
     """Choose a new data source."""
-    profile = get_profile(key, auth=True)
+    profile = dao.get_recipe(key, auth=True)
     return render_template('data-source.html', key=key, profile=profile)
 
 
@@ -96,19 +96,19 @@ def show_data_source(key=None):
 @app.route("/data/<key>/tagger")
 def show_data_tag(key=None):
     """Add HXL tags to an untagged dataset."""
-    profile = get_profile(key, auth=True)
+    profile = dao.get_recipe(key, auth=True)
 
     header_row = request.args.get('header-row')
     if header_row:
         header_row = int(header_row)
 
-    if not profile.get('url'):
+    if not profile.url:
         flash('Please choose a data source first.')
         return redirect(make_data_url(profile, key, 'source'), 303)
 
     preview = []
     i = 0
-    for row in hxl.io.make_input(profile.get('url')):
+    for row in hxl.io.make_input(profile.url):
         if i >= 25:
             break
         else:
@@ -123,9 +123,9 @@ def show_data_tag(key=None):
 @app.route("/data/<key>/edit", methods=['GET', 'POST'])
 def show_data_edit(key=None):
     """Create or edit a filter pipeline."""
-    profile = get_profile(key, auth=True)
+    profile = dao.get_recipe(key, auth=True)
 
-    if profile.get('url'):
+    if profile.url:
         # show only a short preview
         try:
             source = PreviewFilter(setup_filters(profile), max_rows=5)
@@ -140,12 +140,12 @@ def show_data_edit(key=None):
     # Figure out how many filter forms to show
     filter_count = 0
     for n in range(1, MAX_FILTER_COUNT):
-        if profile['args'].get('filter%02d' % n):
+        if profile.args.get('filter%02d' % n):
             filter_count = n
     if filter_count < MAX_FILTER_COUNT:
         filter_count += 1
 
-    show_headers = (profile['args'].get('strip-headers') != 'on')
+    show_headers = (profile.args.get('strip-headers') != 'on')
 
     return render_template('data-recipe.html', key=key, profile=profile, source=source, show_headers=show_headers, filter_count=filter_count)
 
@@ -153,9 +153,9 @@ def show_data_edit(key=None):
 @app.route("/data/<key>/profile")
 def show_data_profile(key=None):
     """Show form to save a profile."""
-    profile = get_profile(key, auth=True)
+    profile = dao.get_recipe(key, auth=True)
 
-    if not profile or not profile.get('url'):
+    if not profile or not profile.url:
         return redirect('/data/source', 303)
 
     return render_template('data-about.html', key=key, profile=profile)
@@ -164,8 +164,8 @@ def show_data_profile(key=None):
 @app.route('/data/chart')
 def show_data_chart(key=None):
     """Show a chart visualisation for the data."""
-    profile = get_profile(key)
-    if not profile or not profile.get('url'):
+    profile = dao.get_recipe(key)
+    if not profile or not profile.url:
         return redirect('/data/source', 303)
 
     source = setup_filters(profile)
@@ -182,8 +182,8 @@ def show_data_chart(key=None):
 @app.route('/data/map')
 def show_data_map(key=None):
     """Show a map visualisation for the data."""
-    profile = get_profile(key)
-    if not profile or not profile.get('url'):
+    profile = dao.get_recipe(key)
+    if not profile or not profile.url:
         return redirect('/data/source', 303)
     layer_tag = hxl.TagPattern.parse(request.args.get('layer', 'adm1'))
     return render_template('visualise-map.html', key=key, profile=profile, layer_tag=layer_tag)
@@ -194,26 +194,18 @@ def show_validate(key=None):
     """Validate the data."""
 
     # Get the profile
-    profile = get_profile(key)
-    if not profile or not profile.get('url'):
+    profile = dao.get_recipe(key)
+    if not profile or not profile.url:
         return redirect('/data/source', 303)
 
-    # Get the parameters
-    url = profile.get('url')
-    if request.args.get('schema_url'):
-        schema_url = request.args.get('schema_url', None)
-    else:
-        schema_url = profile['args'].get('schema_url', None)
-
     severity_level = request.args.get('severity', 'info')
-
     detail_hash = request.args.get('details', None)
 
     # If we have a URL, validate the data.
-    if url:
-        errors = do_validate(setup_filters(profile), schema_url, severity_level)
+    if profile.url:
+        errors = do_validate(setup_filters(profile), profile.schema_url, severity_level)
 
-    return render_template('validate-summary.html', key=key, profile=profile, schema_url=schema_url, errors=errors, detail_hash=detail_hash, severity=severity_level)
+    return render_template('validate-summary.html', key=key, profile=profile, schema_url=profile.schema_url, errors=errors, detail_hash=detail_hash, severity=severity_level)
 
 @app.route("/data/<key>.<format>")
 @app.route("/data/<key>/download/<stub>.<format>")
@@ -224,12 +216,12 @@ def show_validate(key=None):
 def show_data(key=None, format="html", stub=None):
 
     def get_result (key, format):
-        profile = get_profile(key, auth=False)
-        if not profile or not profile.get('url'):
+        profile = dao.get_recipe(key, auth=False)
+        if not profile or not profile.url:
             return redirect('/data/source', 303)
 
         source = setup_filters(profile)
-        show_headers = (profile['args'].get('strip-headers') != 'on')
+        show_headers = (profile.args.get('strip-headers') != 'on')
 
         if format == 'html':
             return render_template('data-view.html', source=source, profile=profile, key=key, show_headers=show_headers)
@@ -261,7 +253,7 @@ def do_data_save():
 
     # We will have a key if we're updating an existing pipeline
     key = request.form.get('key')
-    profile = get_profile(key, auth=True, args=request.form)
+    profile = dao.get_recipe(key, auth=True, args=request.form)
 
     # Update profile metadata
     if 'name' in request.form:
@@ -274,10 +266,10 @@ def do_data_save():
         profile.stub = request.form['stub']
 
     # merge args
-    profile['args'] = {}
+    profile.args = {}
     for name in request.form:
         if request.form.get(name) and name not in BLACKLIST:
-            profile['args'][name] = request.form.get(name)
+            profile.args[name] = request.form.get(name)
 
     # check for a password change
     password = request.form.get('password')

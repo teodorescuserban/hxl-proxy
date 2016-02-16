@@ -60,7 +60,7 @@ def urlencode_utf8(params):
     )
 
 def using_tagger_p(profile):
-    for name in profile['args']:
+    for name in profile.args:
         if re.match(r'^tagger-', name):
             return True
     return False
@@ -73,42 +73,6 @@ def get_gravatar(email, size=40):
         size=size
     )
     return url
-
-PROFILE_OVERRIDES = ['url', 'schema_url']
-PROFILE_ARGS_EXCLUDE = ['url', 'schema_url', 'stub', 'key', 'cloneable', 'format', 'filter_count', 'password', 'password-repeat', 'name', 'description']
-
-def get_profile(key=None, auth=False, args=None):
-    """Load a profile or create from args."""
-
-    if args is None:
-        args = request.args
-
-    if key:
-        #profile = dao.RecipeDAO.read(str(key))
-        if not profile:
-            raise NotFound("No saved profile for " + key)
-        if auth and not check_auth(profile):
-            raise Forbidden("Not authorised")
-        # Allow some values to be overridden from request parameters
-        for name in PROFILE_OVERRIDES:
-            if args.get(name):
-                profile['overridden'] = True
-                profile['args'][name] = args.get(name)
-    else:
-        profile = { 'args': {} }
-
-        # Copy args
-        for name in args:
-            profile['args'][name] = args[name]
-
-        # Move up top-level properties
-        for name in PROFILE_ARGS_EXCLUDE:
-            if profile['args'].get(name):
-                profile[name] = profile['args'][name]
-                del profile['args'][name]
-
-    return profile
-
 
 def check_auth(profile):
     """Check authorisation."""
@@ -149,7 +113,7 @@ def make_data_url(profile=None, key=None, facet=None, format=None):
             url += '.' + urlquote(format)
         elif facet:
             url += '/' + urlquote(facet)
-        url += '?' + urlencode_utf8(profile['args'])
+        url += '?' + urlencode_utf8(profile.args)
 
     return url
 

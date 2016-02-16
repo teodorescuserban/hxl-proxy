@@ -1,5 +1,5 @@
 from hxl_proxy import app, util, recipes
-from flask import g
+from flask import g, request
 import sqlite3, json, os
 
 SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'schema.sql')
@@ -122,5 +122,5 @@ def get_recipe(key=None, auth=False, args=None):
     else:
         recipe = recipes.Recipe(args)
 
-    return profile
+    return recipe
 
