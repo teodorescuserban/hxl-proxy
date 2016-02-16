@@ -1,13 +1,18 @@
-"""A data recipe"""
+"""Logic for data recipes, including conversion from representations."""
 
 import json
 from hxl_proxy.util import urlquote
 
 class Recipe(object):
+    """A data recipe."""
+
+    PROPERTY_ARGS = ['key', 'url', 'schema_url', 'name', 'description', 'stub', 'cloneable']
+    """Arguments that should become object properties."""
 
     def __init__(self, args_in=None, db_in=None):
         """Construct a recipe.
-        @param args_in: GET parameters for building the recipe
+        @param args_in: dict of HTTP-style parameters for building the recipe (default: None)
+        @param db_in: dict of SQL-style values for building the recipe (default: None)
         """
 
         self.url = None
@@ -28,20 +33,31 @@ class Recipe(object):
         self.description = None
         """The description of the dataset (only if saved)"""
 
+        self.stub = ''
+        """The download filename stub (only if saved)"""
+
+        self.cloneable = True
+        """Are users allowed to clone this recipe? (only if saved)"""
+
         self.args = {}
         """The dynamic parameters for filters, etc."""
 
+        self.overridden = False
+        """True if this recipe has been overridden by request parameters"""
+
+        # Initialise if we have starting data
         if args_in is not None:
+            # initialise from HTTP-style parameters
             self.from_args(args_in)
         elif db_in is not None:
+            # initialise from SQL-style parameters
             self.from_db(db_in)
 
 
-    PROPERTY_ARGS = ['key', 'url', 'schema_url', 'name', 'description', 'stub']
-
     def from_args(self, args_in):
-        """Populate a recipe from GET or POST parameters
+        """Populate a recipe from HTTP-style parameters
         @param args_in: a dict of parameters
+        @return: this object
         """
         recipe = Recipe()
         for name in self.PROPERTY_ARGS:
@@ -53,6 +69,9 @@ class Recipe(object):
         return self
 
     def to_args(self, include_save_props=False):
+        """Generate a dict of HTTP-style parameters
+        @param include_save_props: if True, include name, description, etc. (default: False)
+        """
         args_out = {}
         for name, value in self.args.items():
             if name not in self.PROPERTY_ARGS:
@@ -66,6 +85,10 @@ class Recipe(object):
         return args_out
 
     def from_db(self, db_in):
+        """Populate a recipe from a SQL data row.
+        @param db_in: a dict of SQL-style values
+        @return: this object
+        """
         db_in = dict(db_in) # FIXME why do we crash without this?
         for name in db_in:
             if name in self.PROPERTY_ARGS:
@@ -76,6 +99,10 @@ class Recipe(object):
         return self
                 
     def to_query_string(self, overrides={}):
+        """Generate a URL-encoded parameter string.
+        @param overrides: a dict of values to replace (False values mean remove the parameter)
+        @return: a URL-encode query string
+        """
         filtered_args = {}
 
         for name, value in self.to_args().items():
