@@ -18,7 +18,6 @@ from flask import url_for, request, flash, session, g, get_flashed_messages
 import hxl
 
 from hxl_proxy import app, dao
-from hxl_proxy.profiles import Profile
 
 CACHE_KEY_EXCLUDES = ['force']
 

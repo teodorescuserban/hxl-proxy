@@ -29,7 +29,6 @@ from hxl_proxy.validate import do_validate
 from hxl_proxy.hdx import get_hdx_datasets
 from hxl_proxy.preview import PreviewFilter
 from hxl_proxy.auth import get_hid_login_url, get_hid_user
-from hxl_proxy.profiles import ProfileManager, BLACKLIST
 
 #
 # Error handling

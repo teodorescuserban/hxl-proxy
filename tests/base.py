@@ -11,7 +11,6 @@ import os
 import tempfile
 
 import hxl_proxy
-from hxl_proxy.profiles import ProfileManager, Profile
 
 
 class BaseControllerTest(unittest.TestCase):

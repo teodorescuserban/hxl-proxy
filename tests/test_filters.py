@@ -14,7 +14,6 @@ from hxl.model import TagPattern
 from hxl.io import ArrayInput, HXLReader
 import hxl_proxy
 from hxl_proxy.filters import *
-from hxl_proxy.profiles import Profile
 
 #
 # Mock URL access so that tests work offline
