@@ -11,7 +11,7 @@
       <h1>Password required</h1>
     </header>
     <main>
-      <p>You need to enter the correct password to edit <a href="{{ data_url(profile, key) }}">{{ profile.name }}</a></p>
+      <p>You need to enter the correct password to edit <a href="{{ data_url(recipe, key) }}">{{ recipe.name }}</a></p>
       <form class="theme-form" method="POST" action="/data/{{ key }}/edit">
         <div class="required form-group">
           <label for="password">Password</label>

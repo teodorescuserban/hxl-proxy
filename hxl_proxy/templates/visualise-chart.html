@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <title>
-      Chart{% if profile.name %} of {{ profile.name }}{% endif %}
+      Chart{% if recipe.name %} of {{ recipe.name }}{% endif %}
       @ HXL Proxy
     </title>
     {% include "includes/headers.html" %}
@@ -17,7 +17,7 @@
         <li role="presentation"{% if type=='column' %} class="active"{% endif %}><a href="{{ add_args({'type': 'column'}) }}">Column</a></li>
       </ul>
       <h1>
-        Chart{% if profile.name %} of {{ profile.name }}{% endif %}
+        Chart{% if recipe.name %} of {{ recipe.name }}{% endif %}
       </h1>
     </header>
     <main>
@@ -80,7 +80,7 @@
     <script type="text/javascript" src="{{ static('libhxl/hxl.js') }}"></script>
     <script type="text/javascript">
       hxl_proxy.setupChart({
-      data_url: "{{ data_url(profile, key, format='csv') | safe }}",
+      data_url: "{{ data_url(recipe, key, format='csv') | safe }}",
       type: "{{ type|nonone|safe }}",
       value_pattern: "{{ tag|nonone|safe }}",
       label_pattern: "{{ label|nonone|safe }}"

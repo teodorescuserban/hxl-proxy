@@ -31,13 +31,13 @@ class BaseControllerTest(unittest.TestCase):
             hxl_proxy.dao.create_db()
             hxl_proxy.dao._executefile(self.DB_SCRIPT)
 
-        #self.key = ProfileManager(self.filename).add_profile(self.make_profile())
+        #self.key = RecipeManager(self.filename).add_recipe(self.make_recipe())
         self.key = 'AAAAA'
         self.client = hxl_proxy.app.test_client()
 
         
     def tearDown(self):
-        """Remove the temporary profile database"""
+        """Remove the temporary recipe database"""
         pass
     
     def get(self, path, params=None, status=200):
@@ -64,11 +64,11 @@ class BaseControllerTest(unittest.TestCase):
         assert b'Myanmar' in response.data
 
     @staticmethod
-    def make_profile():
-        profile = Profile({
+    def make_recipe():
+        recipe = Recipe({
             'url': 'http://example.org/basic-dataset.csv'
         })
-        profile.name = 'Sample dataset'
-        return profile
+        recipe.name = 'Sample dataset'
+        return recipe
 
 

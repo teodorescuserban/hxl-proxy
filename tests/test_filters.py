@@ -43,8 +43,8 @@ class TestSetupFilters(unittest.TestCase):
             'filter03': 'sort',
             'sort-tags02': 'adm1,adm2'
         }
-        profile = hxl_proxy.dao.get_recipe(args=args)
-        source = setup_filters(profile)
+        recipe = hxl_proxy.dao.get_recipe(args=args)
+        source = setup_filters(recipe)
 
         # check the whole pipeline
         self.assertEqual('SortFilter', source.__class__.__name__, "sort filter is fourth")
@@ -52,12 +52,12 @@ class TestSetupFilters(unittest.TestCase):
         self.assertEqual('CountFilter', source.source.source.__class__.__name__, "count filter is second")
         self.assertEqual('HXLReader', source.source.source.source.__class__.__name__, "reader is first")
 
-    def test_null_profile(self):
+    def test_null_recipe(self):
         self.assertIsNone(setup_filters(None), "ok to pass None to setup_filters")
 
     def test_null_url(self):
-        profile = hxl_proxy.dao.get_recipe(args={})
-        self.assertIsNone(setup_filters(profile), "ok to pass null URL to setup_filters")
+        recipe = hxl_proxy.dao.get_recipe(args={})
+        self.assertIsNone(setup_filters(recipe), "ok to pass null URL to setup_filters")
 
 
 class TestPipelineFunctions(unittest.TestCase):

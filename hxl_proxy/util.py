@@ -59,8 +59,8 @@ def urlencode_utf8(params):
             urlquote(k) + '=' + urlquote(v) for k, v in params if v
     )
 
-def using_tagger_p(profile):
-    for name in profile.args:
+def using_tagger_p(recipe):
+    for name in recipe.args:
         if re.match(r'^tagger-', name):
             return True
     return False
@@ -74,9 +74,9 @@ def get_gravatar(email, size=40):
     )
     return url
 
-def check_auth(profile):
+def check_auth(recipe):
     """Check authorisation."""
-    if g.user and (g.user['user_id'] == profile.owner_id):
+    if g.user and (g.user['user_id'] == recipe.owner_id):
         return True
     else:
         return False
@@ -95,16 +95,16 @@ def add_args(extra_args):
             del args[key]
     return '?' + urlencode_utf8(args)
 
-def make_data_url(profile=None, key=None, facet=None, format=None):
-    """Construct a data URL for a profile."""
+def make_data_url(recipe=None, key=None, facet=None, format=None):
+    """Construct a data URL for a recipe."""
     url = None
     if key:
         url = '/data/' + urlquote(key)
         if facet:
             url += '/' + urlquote(facet)
         elif format:
-            if hasattr(profile, 'stub') and profile.stub:
-                url += '/download/' + urlquote(profile.stub) + '.' + urlquote(format)
+            if hasattr(recipe, 'stub') and recipe.stub:
+                url += '/download/' + urlquote(recipe.stub) + '.' + urlquote(format)
             else:
                 url += '.' + urlquote(format)
     else:
@@ -113,7 +113,7 @@ def make_data_url(profile=None, key=None, facet=None, format=None):
             url += '.' + urlquote(format)
         elif facet:
             url += '/' + urlquote(facet)
-        url += '?' + profile.to_query_string()
+        url += '?' + recipe.to_query_string()
 
     return url
 
