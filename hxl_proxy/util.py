@@ -76,7 +76,7 @@ def get_gravatar(email, size=40):
 
 def check_auth(profile):
     """Check authorisation."""
-    if g.user and (g.user['user_id'] == profile['user_id']):
+    if g.user and (g.user['user_id'] == profile.owner_id):
         return True
     else:
         return False

@@ -23,7 +23,7 @@ from flask import Response, flash, request, render_template, redirect, make_resp
 import hxl
 
 from hxl_proxy import app, cache, dao
-from hxl_proxy.util import check_auth, make_data_url, make_cache_key, skip_cache_p, urlencode_utf8
+from hxl_proxy.util import urlquote, check_auth, make_data_url, make_cache_key, skip_cache_p, urlencode_utf8
 from hxl_proxy.filters import setup_filters, MAX_FILTER_COUNT
 from hxl_proxy.validate import do_validate
 from hxl_proxy.hdx import get_hdx_datasets
@@ -41,7 +41,7 @@ def handle_forbidden(error):
         return redirect('/settings/user', 303)
     else:
         flash("Must be logged in to access {}".format(request.full_path))
-        return redirect('/login?from={}'.format(urlquote(request.full_path), 303))
+        return redirect('/login?from={}'.format(urlquote(request.full_path)), 303)
 
 def error(e):
     """Default error page."""

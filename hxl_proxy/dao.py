@@ -1,5 +1,6 @@
 from hxl_proxy import app, util, recipes
 from flask import g, request
+from werkzeug.exceptions import Forbidden
 import sqlite3, json, os
 
 SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'schema.sql')

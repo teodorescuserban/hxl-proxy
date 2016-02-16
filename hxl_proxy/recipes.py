@@ -9,12 +9,16 @@ class Recipe(object):
         """Construct a recipe.
         @param args_in: GET parameters for building the recipe
         """
+
         self.url = None
         """The URL of the source dataset."""
 
         self.schema_url = None
         """The URL of the default validation schema."""
 
+        self.owner_id = None
+        """The user id for the owner (only if saved)"""
+        
         self.key = None
         """The key of the dataset (only if saved)"""
 
@@ -66,6 +70,7 @@ class Recipe(object):
         for name in db_in:
             if name in self.PROPERTY_ARGS:
                 setattr(self, name, db_in.get(name))
+        self.owner_id = db_in.get('user_id')
         self.key = db_in.get('recipe_id')
         self.args = json.loads(db_in.get('args'))
         return self
