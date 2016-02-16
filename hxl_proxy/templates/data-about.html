@@ -38,7 +38,7 @@
         </div>
         <div class="form-group col-md-6">
           <label for="schema_url">Default schema URL for validation</label>
-          <input name="schema_url" id="schema_url" class="form-control" value="{{ profile.args.schema_url|nonone }}" />
+          <input name="schema_url" id="schema_url" class="form-control" value="{{ profile.schema_url|nonone }}" />
           {% with id='#schema_url' %}{% include "includes/selectors.html" %}{% endwith %}
         </div>
         <div class="form-group col-md-6{% if not key %} required{% endif %}">

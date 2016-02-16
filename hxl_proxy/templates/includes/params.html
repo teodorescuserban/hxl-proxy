@@ -3,3 +3,8 @@
 <input type="hidden" name="{{ name }}" value="{{ profile.args.get(name) }}" />
 {% endif %}
 {% endfor %}
+{% for name in profile.keys() %}
+{% if name != 'args' %}
+<input type="hidden" name="{{ name }}" value="{{ profile.get(name)}}" />
+{% endif %}
+{% endfor %}

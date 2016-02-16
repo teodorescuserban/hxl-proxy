@@ -103,13 +103,13 @@ def show_data_tag(key=None):
     if header_row:
         header_row = int(header_row)
 
-    if not profile['args'].get('url'):
+    if not profile.get('url'):
         flash('Please choose a data source first.')
         return redirect(make_data_url(profile, key, 'source'), 303)
 
     preview = []
     i = 0
-    for row in hxl.io.make_input(profile['args'].get('url')):
+    for row in hxl.io.make_input(profile.get('url')):
         if i >= 25:
             break
         else:
@@ -126,7 +126,7 @@ def show_data_edit(key=None):
     """Create or edit a filter pipeline."""
     profile = get_profile(key, auth=True)
 
-    if profile['args'].get('url'):
+    if profile.get('url'):
         # show only a short preview
         try:
             source = PreviewFilter(setup_filters(profile), max_rows=5)
@@ -156,7 +156,7 @@ def show_data_profile(key=None):
     """Show form to save a profile."""
     profile = get_profile(key, auth=True)
 
-    if not profile or not profile['args'].get('url'):
+    if not profile or not profile.get('url'):
         return redirect('/data/source', 303)
 
     return render_template('data-about.html', key=key, profile=profile)
@@ -166,7 +166,7 @@ def show_data_profile(key=None):
 def show_data_chart(key=None):
     """Show a chart visualisation for the data."""
     profile = get_profile(key)
-    if not profile or not profile['args'].get('url'):
+    if not profile or not profile.get('url'):
         return redirect('/data/source', 303)
 
     source = setup_filters(profile)
@@ -184,7 +184,7 @@ def show_data_chart(key=None):
 def show_data_map(key=None):
     """Show a map visualisation for the data."""
     profile = get_profile(key)
-    if not profile or not profile['args'].get('url'):
+    if not profile or not profile.get('url'):
         return redirect('/data/source', 303)
     layer_tag = hxl.TagPattern.parse(request.args.get('layer', 'adm1'))
     return render_template('visualise-map.html', key=key, profile=profile, layer_tag=layer_tag)
@@ -196,11 +196,11 @@ def show_validate(key=None):
 
     # Get the profile
     profile = get_profile(key)
-    if not profile or not profile['args'].get('url'):
+    if not profile or not profile.get('url'):
         return redirect('/data/source', 303)
 
     # Get the parameters
-    url = profile['args'].get('url')
+    url = profile.get('url')
     if request.args.get('schema_url'):
         schema_url = request.args.get('schema_url', None)
     else:

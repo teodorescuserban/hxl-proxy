@@ -132,7 +132,7 @@
 
                 <div class="form-group">
                   <label for="schema_url">Custom HXL schema URL</label>
-                  <input name="schema_url" id="schema_url" type="url" value="{{ profile.args.schema_url or '' }}" class="form-control"
+                  <input name="schema_url" id="schema_url" type="url" value="{{ profile.schema_url or '' }}" class="form-control"
                          placeholder="http://example.org/my-hxl-schema.csv" />
                   <p class="help-block">You can choose a custom schema with special rules for your dataset.</p>
                   {% with id='#schema_url' %}
