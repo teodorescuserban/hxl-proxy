@@ -17,7 +17,7 @@ from flask import url_for, request, flash, session, g, get_flashed_messages
 
 import hxl
 
-from hxl_proxy import app, dao
+from hxl_proxy import app
 
 CACHE_KEY_EXCLUDES = ['force']
 
@@ -84,7 +84,7 @@ def get_profile(key=None, auth=False, args=None):
         args = request.args
 
     if key:
-        profile = dao.Recipes.read(str(key))
+        #profile = dao.RecipeDAO.read(str(key))
         if not profile:
             raise NotFound("No saved profile for " + key)
         if auth and not check_auth(profile):

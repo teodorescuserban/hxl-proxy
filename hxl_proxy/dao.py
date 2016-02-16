@@ -1,4 +1,4 @@
-from hxl_proxy import app
+from hxl_proxy import app, util, recipes
 from flask import g
 import sqlite3, json, os
 
@@ -47,7 +47,7 @@ def create_db():
     """Create a new database, erasing the current one."""
     _executefile(SCHEMA_FILE)
 
-class Users:
+class UserDAO:
 
     @staticmethod
     def create(user):
@@ -81,7 +81,7 @@ class Users:
         )
         get_db().commit()
 
-class Recipes:
+class RecipeDAO:
 
     @staticmethod
     def read(recipe_id):
@@ -99,3 +99,28 @@ class Recipes:
             'select * from Recipes where user_id=?',
             (user_id,)
         ).fetchall()
+
+RECIPE_OVERRIDES = ['url', 'schema_url']
+
+def get_recipe(key=None, auth=False, args=None):
+    """Load a recipe or create from args."""
+
+    if args is None:
+        args = request.args
+
+    if key:
+        recipe = dao.RecipeDAO.read(str(key))
+        if not recipe:
+            raise NotFound("No saved recipe for " + key)
+        if auth and not util.check_auth(recipe):
+            raise Forbidden("Not authorised")
+        # Allow some values to be overridden from request parameters
+        for name in RECIPE_OVERRIDES:
+            if args.get(name):
+                recipe['overridden'] = True
+                recipe['args'][name] = args.get(name)
+    else:
+        recipe = recipes.Recipe(args)
+
+    return profile
+

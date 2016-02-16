@@ -67,7 +67,7 @@ def before_request():
     app.secret_key = app.config['SECRET_KEY']
     request.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
     if (session.get('user_id')):
-        g.user = dao.Users.read(session.get('user_id'))
+        g.user = dao.UserDAO.read(session.get('user_id'))
     else:
         g.user = None
 
@@ -309,7 +309,7 @@ def do_data_save():
 @app.route('/settings/user')
 def do_user_settings():
     if g.user:
-        return render_template('settings-user.html', user=g.user, recipes=dao.Recipes.list(g.user['user_id']))
+        return render_template('settings-user.html', user=g.user, recipes=dao.RecipeDAO.list(g.user['user_id']))
     else:
         return redirect('/login', 303)
 
@@ -340,11 +340,11 @@ def do_hid_authorisation():
 
     user_id = user_info['user_id']
     session['user_id'] = user_id
-    user = dao.Users.read(user_id)
+    user = dao.UserDAO.read(user_id)
     if user:
-        dao.Users.update(user_info)
+        dao.UserDAO.update(user_info)
     else:
-        dao.Users.create(user_info)
+        dao.UserDAO.create(user_info)
     flash("Connected to your Humanitarian.ID account as {}".format(user_info.get('name')))
     return redirect(redirect_path, 303)
 
