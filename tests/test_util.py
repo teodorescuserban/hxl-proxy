@@ -56,7 +56,6 @@ class TestUtil(unittest.TestCase):
         """Test that we can detect use of tagger"""
         with hxl_proxy.app.test_request_context('/data?url=http://example.org&tagger-01-header=country+code&tagger-01-tag=country%2Bcode'):
             profile = hxl_proxy.dao.get_recipe()
-            print(profile)
             self.assertTrue(hxl_proxy.util.using_tagger_p(profile))
         with hxl_proxy.app.test_request_context('/data?url=http://example.org'):
             profile = hxl_proxy.dao.get_recipe()

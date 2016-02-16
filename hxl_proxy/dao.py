@@ -85,13 +85,15 @@ class RecipeDAO:
 
     @staticmethod
     def read(recipe_id):
-        recipe = _execute(
+        db_in = _execute(
             'select * from Recipes where recipe_id=?',
             (recipe_id,)
         ).fetchone()
-        recipe = dict(recipe)
-        recipe['args'] = json.loads(recipe['args'])
-        return recipe
+        if db_in:
+            recipe = recipes.Recipe(db_in=db_in)
+            return recipe
+        else:
+            return None
 
     @staticmethod
     def list(user_id=None):
@@ -109,16 +111,16 @@ def get_recipe(key=None, auth=False, args=None):
         args = request.args
 
     if key:
-        recipe = dao.RecipeDAO.read(str(key))
+        recipe = RecipeDAO.read(str(key))
         if not recipe:
             raise NotFound("No saved recipe for " + key)
-        if auth and not util.check_auth(recipe):
+        elif auth and not util.check_auth(recipe):
             raise Forbidden("Not authorised")
         # Allow some values to be overridden from request parameters
         for name in RECIPE_OVERRIDES:
             if args.get(name):
-                recipe['overridden'] = True
-                recipe['args'][name] = args.get(name)
+                #recipe['overridden'] = True
+                recipe.args[name] = args.get(name)
     else:
         recipe = recipes.Recipe(args)
 

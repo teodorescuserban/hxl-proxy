@@ -1,15 +1,14 @@
 """A data recipe"""
 
+import json
 from hxl_proxy.util import urlquote
 
 class Recipe(object):
 
-    def __init__(self, args_in=None):
+    def __init__(self, args_in=None, db_in=None):
         """Construct a recipe.
-
         @param args_in: GET parameters for building the recipe
         """
-
         self.url = None
         """The URL of the source dataset."""
 
@@ -30,9 +29,11 @@ class Recipe(object):
 
         if args_in is not None:
             self.from_args(args_in)
+        elif db_in is not None:
+            self.from_db(db_in)
 
 
-    PROPERTY_ARGS = ['key', 'url', 'schema_url', 'name', 'description']
+    PROPERTY_ARGS = ['key', 'url', 'schema_url', 'name', 'description', 'stub']
 
     def from_args(self, args_in):
         """Populate a recipe from GET or POST parameters
@@ -59,6 +60,15 @@ class Recipe(object):
             args_out['url'] = self.url
             args_out['schema_url'] = self.schema_url
         return args_out
+
+    def from_db(self, db_in):
+        db_in = dict(db_in) # FIXME why do we crash without this?
+        for name in db_in:
+            if name in self.PROPERTY_ARGS:
+                setattr(self, name, db_in.get(name))
+        self.key = db_in.get('recipe_id')
+        self.args = json.loads(db_in.get('args'))
+        return self
                 
     def to_query_string(self, overrides={}):
         filtered_args = {}
