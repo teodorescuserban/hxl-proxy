@@ -113,7 +113,7 @@ def make_data_url(profile=None, key=None, facet=None, format=None):
             url += '.' + urlquote(format)
         elif facet:
             url += '/' + urlquote(facet)
-        url += '?' + urlencode_utf8(profile.args)
+        url += '?' + profile.to_query_string()
 
     return url
 
