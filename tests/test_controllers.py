@@ -11,6 +11,7 @@ License: Public Domain
 # Mock URL access so that tests work offline
 from . import URL_MOCK_TARGET, URL_MOCK_OBJECT
 from unittest.mock import patch
+import hxl_proxy, re
 
 # Use a common base class
 from .base import BaseControllerTest
@@ -155,9 +156,13 @@ class TestEditPage(BaseControllerTest):
         response = self.get('/data/{}/edit'.format('AAAAA'), status=303)
         assert '/login'.format(self.key) in response.headers['Location']
 
-    # TODO test logging in (good and bad passwords)
-
-    # TODO test changing recipe
+    @patch(URL_MOCK_TARGET, new=URL_MOCK_OBJECT)
+    def test_logged_in(self):
+        with self.client as client:
+            with client.session_transaction() as session:
+                session['user_id'] = 'user1'
+            response = client.get('data/AAAAA/edit')
+            self.assertEqual(200, response.status_code)
 
 
 class TestDataPage(BaseControllerTest):
@@ -209,5 +214,48 @@ class TestValidationPage(BaseControllerTest):
             'schema_url': 'http://example.org/good-schema.csv'
         })
         assert b'Validation succeeded' in response.data
+
+        
+class TestSaveRecipe(BaseControllerTest):
+
+    def test_need_login(self):
+        response = self.post('/actions/save-recipe', {
+        }, 302)
+        assert '/login' in response.location
+        assert 'from=/data/recipe' in response.location
+
+    def test_basic(self):
+        DATA = {
+            'url': 'http://example.org/basic-dataset.csv',
+            'name': 'Basic dataset',
+            'description': 'A description',
+            'stub': 'basic-dataset'
+        }
+        recipe = self._save_recipe(DATA)
+        for name in DATA:
+            self.assertEqual(DATA[name], getattr(recipe, name))
+        self.assertEqual('user1', recipe.owner_id)
+        self.assertFalse(recipe.cloneable)
+
+    def test_cloneable(self):
+        DATA = {
+            'url': 'http://example.org/basic-dataset.csv',
+            'name': 'Basic dataset',
+            'cloneable': 'on'
+        }
+        recipe = self._save_recipe(DATA)
+        self.assertEqual(DATA['url'], recipe.url)
+        self.assertEqual(DATA['name'], recipe.name)
+        self.assertTrue(recipe.cloneable)
+        
+    def _save_recipe(self, data):
+        """Save a recipe and then look it up in the database."""
+        with self.client as client:
+            with client.session_transaction() as session:
+                session['user_id'] = 'user1'
+            response = client.post('/actions/save-recipe', data=data)
+            matches = re.search(r'/data/([^/]{6})$', response.location)
+            key = matches.group(1)
+            return hxl_proxy.dao.RecipeDAO.read(key)
 
 # end

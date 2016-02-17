@@ -37,7 +37,6 @@ class BaseControllerTest(unittest.TestCase):
 
         
     def tearDown(self):
-        """Remove the temporary recipe database"""
         pass
     
     def get(self, path, params=None, status=200):
@@ -49,6 +48,17 @@ class BaseControllerTest(unittest.TestCase):
         @return a Response object
         """
         self.response = self.client.get(path, query_string=params)
+        self.assertEqual(status, self.response.status_code)
+        return self.response
+
+    def post(self, path, params=None, status=200):
+        """Send a POST request to the test client and hang onto the result.
+        @param path: the request path
+        @param params: the POST parameters (default: None)
+        @param status: the expected status (default: 200)
+        @return a Response object
+        """
+        self.response = self.client.post(path, data=params)
         self.assertEqual(status, self.response.status_code)
         return self.response
 
