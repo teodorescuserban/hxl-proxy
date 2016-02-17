@@ -2,7 +2,7 @@
 
 import sqlite3, json, os, random, time, base64, hashlib
 from flask import g, request
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from hxl_proxy import app, util, recipes
 
@@ -194,7 +194,7 @@ def get_recipe(key=None, auth=False, args=None):
         args = request.args
 
     if key:
-        recipe = RecipeDAO.read(str(key))
+        recipe = RecipeDAO.read(key)
         if not recipe:
             raise NotFound("No saved recipe for " + key)
         elif auth and not util.check_auth(recipe):

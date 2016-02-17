@@ -1,6 +1,6 @@
-{% set args = recipe.to_args() %}
+{% set args = recipe.to_args(True) %}
 {% for name in args.keys() %}
 {% if not excludes or name not in excludes %}
-<input type="hidden" name="{{ name }}" value="{{ args.get(name) }}" />
+<input type="hidden" name="{{ name }}" value="{{ args.get(name)|nonone }}" />
 {% endif %}
 {% endfor %}

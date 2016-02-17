@@ -65,17 +65,30 @@ class Recipe(object):
             if name not in self.PROPERTY_ARGS:
                 self.args[name] = value
 
+        if self.cloneable == 'on':
+            self.cloneable = True
+        else:
+            self.cloneable = False
+
         return self
 
-    def to_args(self):
+    def to_args(self, include_save_props=False):
         """Generate a dict of HTTP-style parameters
+        @param include_save_props: if True, include name, description, etc. (default: False)
         """
         args_out = {}
         for name, value in self.args.items():
             if name not in self.PROPERTY_ARGS:
                 args_out[name] = value
-        for name in self.PROPERTY_ARGS:
-            args_out[name] = getattr(self, name)
+        if include_save_props:
+            for name in self.PROPERTY_ARGS:
+                args_out[name] = getattr(self, name)
+        else:
+            args_out['url'] = self.url
+            args_out['schema_url'] = self.schema_url
+
+        if args_out.get('cloneable'):
+            args_out['cloneable'] = 'on'
         return args_out
 
     def from_db(self, db_in):

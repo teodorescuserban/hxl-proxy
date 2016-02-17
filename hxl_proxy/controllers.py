@@ -16,7 +16,6 @@ import tempfile
 
 import werkzeug
 from werkzeug import secure_filename
-from werkzeug.exceptions import BadRequest, Unauthorized, NotFound
 
 from flask import Response, flash, request, render_template, redirect, make_response, session, g, url_for
 
