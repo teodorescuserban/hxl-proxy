@@ -53,7 +53,9 @@
         {% if key %}
         <input type="hidden" name="key" value="{{ key }}" />
         {% endif %}
+        {% with excludes=['key', 'name', 'description', 'cloneable', 'schema_url', 'stub'] %}
         {% include "includes/params.html" %}
+        {% endwith %}
       </form>
     </main>
     {% include "includes/scripts.html" %}
