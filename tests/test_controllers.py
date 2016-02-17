@@ -227,26 +227,27 @@ class TestSaveRecipe(BaseControllerTest):
     def test_basic(self):
         DATA = {
             'url': 'http://example.org/basic-dataset.csv',
+            'schema_url': 'http://example.org/schema-good.csv',
             'name': 'Basic dataset',
             'description': 'A description',
-            'stub': 'basic-dataset'
-        }
-        recipe = self._save_recipe(DATA)
-        for name in DATA:
-            self.assertEqual(DATA[name], getattr(recipe, name))
-        self.assertEqual('user1', recipe.owner_id)
-        self.assertFalse(recipe.cloneable)
-
-    def test_cloneable(self):
-        DATA = {
-            'url': 'http://example.org/basic-dataset.csv',
-            'name': 'Basic dataset',
+            'stub': 'basic-dataset',
             'cloneable': 'on'
         }
         recipe = self._save_recipe(DATA)
-        self.assertEqual(DATA['url'], recipe.url)
-        self.assertEqual(DATA['name'], recipe.name)
+        for name in DATA:
+            if name != 'cloneable':
+                self.assertEqual(DATA[name], getattr(recipe, name))
+        self.assertEqual('user1', recipe.owner_id)
         self.assertTrue(recipe.cloneable)
+        self.assertFalse(recipe.overridden)
+
+    def test_not_cloneable(self):
+        DATA = {
+            'url': 'http://example.org/basic-dataset.csv',
+            'name': 'Basic dataset',
+        }
+        recipe = self._save_recipe(DATA)
+        self.assertFalse(recipe.cloneable)
         
     def _save_recipe(self, data):
         """Save a recipe and then look it up in the database."""
