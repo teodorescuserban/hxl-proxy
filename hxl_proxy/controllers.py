@@ -16,7 +16,7 @@ import tempfile
 
 import werkzeug
 from werkzeug import secure_filename
-from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Unauthorized, NotFound
 
 from flask import Response, flash, request, render_template, redirect, make_response, session, g, url_for
 
@@ -255,43 +255,14 @@ def do_data_save():
     key = request.form.get('key')
     recipe = dao.get_recipe(key, auth=True, args=request.form)
 
-    # Update recipe metadata
-    if 'name' in request.form:
-        recipe.name = request.form['name']
-    if 'description' in request.form:
-        recipe.description = request.form['description']
-    if 'cloneable' in request.form:
-        recipe.cloneable = (request.form['cloneable'] == 'on')
-    if 'stub' in request.form:
-        recipe.stub = request.form['stub']
-
-    # merge args
-    recipe.args = {}
-    for name in request.form:
-        if request.form.get(name) and name not in BLACKLIST:
-            recipe.args[name] = request.form.get(name)
-
-    # check for a password change
-    password = request.form.get('password')
-    password_repeat = request.form.get('password-repeat')
+    if not g.user:
+        return redirect('/login?from={}'.format(make_data_url(recipe, key, 'recipe')))
 
     if key:
-        # Updating an existing recipe.
-        if password:
-            if password == password_repeat:
-                recipe.set_password(password)
-            else:
-                raise BadRequest("Passwords don't match")
-        g.recipes.update_recipe(str(key), recipe)
+        recipe.from_args(request.form)
+        dao.RecipeDAO.update(recipe)
     else:
-        # Creating a new recipe.
-        if password == password_repeat:
-            recipe.set_password(password)
-        else:
-            raise BadRequest("Passwords don't match")
-        key = g.recipes.add_recipe(recipe)
-        # FIXME other auth information is in __init__.py
-        session['passhash'] = recipe.passhash
+        key = dao.RecipeDAO.create(recipe)
 
     # TODO be more specific about what we clear
     cache.clear()

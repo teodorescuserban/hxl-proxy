@@ -53,7 +53,6 @@ class Recipe(object):
             # initialise from SQL-style parameters
             self.from_db(db_in)
 
-
     def from_args(self, args_in):
         """Populate a recipe from HTTP-style parameters
         @param args_in: a dict of parameters
@@ -68,20 +67,15 @@ class Recipe(object):
 
         return self
 
-    def to_args(self, include_save_props=False):
+    def to_args(self):
         """Generate a dict of HTTP-style parameters
-        @param include_save_props: if True, include name, description, etc. (default: False)
         """
         args_out = {}
         for name, value in self.args.items():
             if name not in self.PROPERTY_ARGS:
                 args_out[name] = value
-        if include_save_props:
-            for name in self.PROPERTY_ARGS:
-                args_out[name] = getattr(self, name)
-        else:
-            args_out['url'] = self.url
-            args_out['schema_url'] = self.schema_url
+        for name in self.PROPERTY_ARGS:
+            args_out[name] = getattr(self, name)
         return args_out
 
     def from_db(self, db_in):

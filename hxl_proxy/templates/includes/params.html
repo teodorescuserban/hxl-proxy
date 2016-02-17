@@ -1,10 +1,6 @@
-{% for name in recipe.args.keys() %}
+{% set args = recipe.to_args() %}
+{% for name in args.keys() %}
 {% if not excludes or name not in excludes %}
-<input type="hidden" name="{{ name }}" value="{{ recipe.args.get(name) }}" />
-{% endif %}
-{% endfor %}
-{% for name in recipe.args.keys() %}
-{% if name != 'args' %}
-<input type="hidden" name="{{ name }}" value="{{ recipe.args.get(name)}}" />
+<input type="hidden" name="{{ name }}" value="{{ args.get(name) }}" />
 {% endif %}
 {% endfor %}

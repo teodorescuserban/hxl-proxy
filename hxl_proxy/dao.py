@@ -1,6 +1,6 @@
 """Database access functions and classes."""
 
-import sqlite3, json, os
+import sqlite3, json, os, random, time, base64, hashlib
 from flask import g, request
 from werkzeug.exceptions import Forbidden
 
@@ -55,6 +55,18 @@ def _executefile(filename, commit=True):
     with open(filename, 'r') as input:
         _executescript(input.read(), commit)
 
+def _make_md5(s):
+    """Return an MD5 hash for a string."""
+    return hashlib.md5(s.encode('utf-8')).digest()
+
+def _gen_key():
+    """
+    Generate a pseudo-random, 6-character hash for use as a key.
+    """
+    salt = str(time.time() * random.random())
+    encoded_hash = base64.urlsafe_b64encode(_make_md5(salt))
+    return encoded_hash[:6].decode('ascii')
+
 def create_db():
     """Create a new database, erasing the current one."""
     _executefile(SCHEMA_FILE)
@@ -100,6 +112,23 @@ class RecipeDAO:
     """Manage recipe records in the database."""
 
     @staticmethod
+    def create(recipe):
+        """Add a recipe to the database."""
+        recipe.key = _gen_key()
+        recipe.user_id = g.user['user_id']
+        while RecipeDAO.read(recipe.key):
+            recipe.key = _gen_key()
+        _execute(
+            'insert into Recipes '
+            '(recipe_id, user_id, name, url, schema_url, description, cloneable, stub, args, date_created, date_modified) '
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
+            (recipe.key, recipe.user_id, recipe.name, recipe.url, recipe.schema_url, recipe.description, recipe.cloneable,
+             recipe.stub, json.dumps(recipe.args),)
+        )
+        _get_db().commit()
+        return recipe.key
+
+    @staticmethod
     def read(recipe_id):
         """Read a single recipe.
         @param recipe_id: the recipe's identifier.
@@ -118,6 +147,19 @@ class RecipeDAO:
             return recipe
         else:
             return None
+
+    @staticmethod
+    def update(recipe):
+        """Update a recipe in the database."""
+        _execute(
+            'update Recipes set '
+            "name=?, url=?, schema_url=?, description=?, cloneable=?, stub=?, args=?, date_modified=datetime('now') "
+            'where recipe_id=?',
+            (recipe.name, recipe.url, recipe.schema_url, recipe.description, recipe.cloneable,
+             recipe.stub, json.dumps(recipe.args), recipe.key,)
+        )
+        _get_db().commit()
+        return recipe
 
     @staticmethod
     def list(user_id=None):
